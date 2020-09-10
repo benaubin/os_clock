@@ -2,22 +2,25 @@ use std::io::Error;
 use std::time::Duration;
 
 #[cfg_attr(target_os = "linux", path = "pthread.rs")]
-#[cfg_attr(target_os = "macos", path = "mach/mod.rs")]
+#[cfg_attr(any(target_os = "macos", target_os = "ios"), path = "mach/mod.rs")]
 mod os;
 
-pub use os::clock_for_current_thread;
+pub use os::cpu_clock_for_current_thread;
 
-pub trait OSClock: Sized + Send {
+#[cfg(target_family = "unix")]
+mod unix;
+
+pub trait Clock: Sized + Send {
     fn get_time(&self) -> Result<Duration, Error>;
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{clock_for_current_thread, OSClock};
+    use super::{cpu_clock_for_current_thread, Clock};
 
     #[test]
     fn valid_measurement() {
-        let clock = clock_for_current_thread().unwrap();
+        let clock = cpu_clock_for_current_thread().unwrap();
 
         let mut samples = std::iter::repeat::<()>(())
             .map(|_| clock.get_time().unwrap())
