@@ -1,10 +1,6 @@
-use libc::{clock_gettime, clockid_t, pthread_self, pthread_t, timespec};
-use std::convert::{TryFrom, TryInto};
+use libc::{clockid_t, pthread_self, pthread_t};
 use std::io::Error;
-use std::os::raw::{c_int, c_long};
-use std::time::Duration;
-
-use super::Clock;
+use std::os::raw::c_int;
 
 #[link(name = "pthread")]
 extern "C" {
