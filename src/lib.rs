@@ -1,14 +1,19 @@
 use std::io::Error;
 use std::time::Duration;
 
-#[cfg_attr(target_os = "linux", path = "pthread.rs")]
+#[cfg(not(target_family = "unix"))]
+compile_error!(
+    "Your target platform is not supported. os_clock currently only supports Unix-family systems."
+);
+
 #[cfg_attr(any(target_os = "macos", target_os = "ios"), path = "mach/mod.rs")]
+#[path = "pthread.rs"]
 mod os;
 
 pub use os::cpu_clock_for_current_thread;
 
-#[cfg(target_family = "unix")]
-mod unix;
+mod posix_clock;
+pub use posix_clock::{PosixClock, MONOTONIC_CLOCK, PROCESS_CLOCK, REALTIME_CLOCK};
 
 pub trait Clock: Sized + Send {
     fn get_time(&self) -> Result<Duration, Error>;

@@ -19,6 +19,7 @@ fn main() {
             .whitelist_function("thread_info")
             .whitelist_var("THREAD_BASIC_INFO_COUNT")
             .whitelist_type("thread_basic_info_data_t")
+            .parse_callbacks(Box::new(bindgen::CargoCallbacks))
             // Finish the builder and generate the bindings.
             .generate()
             // Unwrap the Result and panic on failure.
