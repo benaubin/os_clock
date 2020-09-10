@@ -9,7 +9,15 @@ extern "C" {
     fn pthread_getcpuclockid(thread: pthread_t, clock_id: *mut clockid_t) -> c_int;
 }
 
-/// Get the cpu clock for the current thread
+/// Get a clock for the CPU time of the current thread
+///
+/// ```
+/// use std::io;
+/// use os_clock::{self, Clock};
+///
+/// let clock = os_clock::cpu_clock_for_current_thread().unwrap();
+/// let time = clock.get_time();
+/// ```
 pub fn cpu_clock_for_current_thread() -> Result<PosixClock, Error> {
     let mut clockid = 0 as clockid_t;
 
