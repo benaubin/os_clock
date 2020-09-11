@@ -1,12 +1,13 @@
 [package]
 name = "os_clock"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Ben Aubin <ben@benaubin.com>"]
 edition = "2018"
 license = "MIT"
 description = "Operating system clocks, for measuring with cpu time"
 homepage = "https://github.com/benaubin/os_clocks"
 repository = "https://github.com/benaubin/os_clocks"
+documentation = "https://docs.rs/os_clock"
 readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
