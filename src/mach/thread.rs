@@ -10,8 +10,10 @@ use std::mem::MaybeUninit;
 
 use crate::Clock;
 
-/// A Mach thread, holds the port. Unsafe to initialize directly, unless known to be a valid thread
-/// Instead, initialize with Thread::current()
+/// Information about a thread on the Mach kernel.
+///
+/// Unsafe to initialize directly, unless known to be a valid thread.
+/// Access the current thread with Thread::current()
 pub struct Thread(mach_port_t);
 
 impl Thread {
@@ -38,7 +40,7 @@ impl Thread {
         Ok(info)
     }
 
-    /// The amount of time spent running this thread in user mdoe
+    /// The amount of time spent running this thread in user mode
     pub fn get_user_time(&self) -> Result<Duration> {
         let info = self.get_basic_info()?;
         let time = Duration::from(info.user_time);
@@ -79,4 +81,21 @@ impl From<Thread> for ThreadCPUClock {
     fn from(thread: Thread) -> ThreadCPUClock {
         ThreadCPUClock(thread)
     }
+}
+
+/// Get a clock for the CPU time of the current thread
+///
+/// ```
+/// use std::io;
+/// use os_clock::{self, Clock};
+///
+/// let clock = os_clock::cpu_clock_for_current_thread().unwrap();
+/// let time = clock.get_time().unwrap();
+///
+/// # let time_2 = clock.get_time().unwrap();
+/// #
+/// # assert!(time_2 > time);
+/// ```
+pub fn cpu_clock_for_current_thread() -> Result<ThreadCPUClock> {
+    Ok(Thread::current().into())
 }

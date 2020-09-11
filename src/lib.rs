@@ -1,21 +1,26 @@
 use std::io::Error;
 use std::time::Duration;
 
-#[cfg(not(target_family = "unix"))]
-compile_error!(
-    "Your target platform is not supported. os_clock currently only supports Unix-family systems."
-);
-
 #[cfg_attr(any(target_os = "macos", target_os = "ios"), path = "mach/mod.rs")]
+#[allow(unused_attributes)] // in order to allow #[path = "pthread.rs"] to work
 #[path = "pthread.rs"]
 mod os;
 
-pub use os::cpu_clock_for_current_thread;
+pub use os::{cpu_clock_for_current_thread, ThreadCPUClock};
+
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub use os::Thread;
 
 mod posix_clock;
-pub use posix_clock::{PosixClock, MONOTONIC_CLOCK, PROCESS_CLOCK, REALTIME_CLOCK};
+pub use posix_clock::{
+    get_current_thread_cpu_time, PosixClock, MONOTONIC_CLOCK, PROCESS_CLOCK, REALTIME_CLOCK,
+};
 
 pub trait Clock: Sized + Send {
+    /// Get the current time value of the clock.
+    ///
+    /// Note that the meaning of the `Duration` differs depending on implementation.
+    /// Sometimes the clock represents CPU time, sometimes wall time, etc.
     fn get_time(&self) -> Result<Duration, Error>;
 }
 

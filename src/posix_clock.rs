@@ -1,5 +1,6 @@
 use libc::{
     clock_gettime, clockid_t, timespec, CLOCK_MONOTONIC, CLOCK_PROCESS_CPUTIME_ID, CLOCK_REALTIME,
+    CLOCK_THREAD_CPUTIME_ID,
 };
 use std::io::Error;
 use std::time::Duration;
@@ -28,6 +29,21 @@ pub const REALTIME_CLOCK: PosixClock = PosixClock(CLOCK_REALTIME);
 pub const MONOTONIC_CLOCK: PosixClock = PosixClock(CLOCK_MONOTONIC);
 /// The process-wide cpu-time clock
 pub const PROCESS_CLOCK: PosixClock = PosixClock(CLOCK_PROCESS_CPUTIME_ID);
+
+/// The cpu-time clock for the current thread, note that this is __always__ the current thread.
+///
+/// This is a private api as it is easy to misuse.
+/// `get_current_thread_cpu_time` exposes the functionality of this constant.
+///
+/// Alternatively, use `cpu_clock_for_current_thread` to get a transferable clock for the current thread.
+const CURRENT_THREAD_CPUTIME_CLOCK: PosixClock = PosixClock(CLOCK_THREAD_CPUTIME_ID);
+
+/// Get the CPU time of the current thread
+///
+/// Alternatively, use `cpu_clock_for_current_thread` to get a transferable clock for the current thread.
+pub fn get_current_thread_cpu_time() -> Result<Duration, Error> {
+    CURRENT_THREAD_CPUTIME_CLOCK.get_time()
+}
 
 impl Clock for PosixClock {
     fn get_time(&self) -> Result<Duration, Error> {

@@ -9,6 +9,9 @@ extern "C" {
     fn pthread_getcpuclockid(thread: pthread_t, clock_id: *mut clockid_t) -> c_int;
 }
 
+/// A type alias for compatibility with Mach
+pub type ThreadCPUClock = PosixClock;
+
 /// Get a clock for the CPU time of the current thread
 ///
 /// ```
@@ -16,9 +19,13 @@ extern "C" {
 /// use os_clock::{self, Clock};
 ///
 /// let clock = os_clock::cpu_clock_for_current_thread().unwrap();
-/// let time = clock.get_time();
+/// let time = clock.get_time().unwrap();
+///
+/// # let time_2 = clock.get_time().unwrap();
+/// #
+/// # assert!(time_2 > time);
 /// ```
-pub fn cpu_clock_for_current_thread() -> Result<PosixClock, Error> {
+pub fn cpu_clock_for_current_thread() -> Result<ThreadCPUClock, Error> {
     let mut clockid = 0 as clockid_t;
 
     // unsafe because accessing FFI, which doesnt change global state, fills clock_id
@@ -27,7 +34,7 @@ pub fn cpu_clock_for_current_thread() -> Result<PosixClock, Error> {
     }
 
     // valid because clockid is known to be valid
-    let clock = unsafe { PosixClock::from_clockid(clockid) };
+    let clock = unsafe { ThreadCPUClock::from_clockid(clockid) };
 
     return Ok(clock);
 }
