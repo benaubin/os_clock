@@ -126,6 +126,6 @@ avg: {}, mad scaled: {}",
             samples, avg, mean_abs_dev_scaled
         );
 
-        assert!(mean_abs_dev_scaled < 0.1); // test that samples are on average within 10% of the mean
+        assert!(mean_abs_dev_scaled < 0.25); // test that samples are on average within 25% of the mean
     }
 }
