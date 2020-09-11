@@ -32,9 +32,21 @@
 //! // Clocks count from the thread's spawn time
 //! let new_clock = os_clock::cpu_clock_for_current_thread().unwrap();
 //! assert!(new_clock.get_time().unwrap() > Duration::from_millis(5));
+//!
+//! // Use a timer to start counting from the moment the timer is created
+//! let timer = new_clock.start_timer().unwrap();
+//! assert!(timer.elapsed().unwrap() < Duration::from_millis(1));
+//! // Do some work for 5ms...
+//! # loop {
+//! #     if timer.elapsed().unwrap() > Duration::from_millis(5) {
+//! #         break;
+//! #     }
+//! # }
+//! assert!(timer.elapsed().unwrap() > Duration::from_millis(5));
+//!
 //! ```
 
-use std::io::Error;
+use std::io::Result;
 use std::time::Duration;
 
 #[cfg_attr(any(target_os = "macos", target_os = "ios"), path = "mach/mod.rs")]
@@ -48,16 +60,27 @@ pub use os::{cpu_clock_for_current_thread, ThreadCPUClock};
 pub use os::Thread;
 
 mod posix_clock;
+mod timer;
 pub use posix_clock::{
     get_current_thread_cpu_time, PosixClock, MONOTONIC_CLOCK, PROCESS_CLOCK, REALTIME_CLOCK,
 };
+
+pub use timer::Timer;
 
 pub trait Clock: Sized + Send {
     /// Get the current time value of the clock.
     ///
     /// Note that the meaning of the `Duration` differs depending on implementation.
     /// Sometimes the clock represents CPU time, sometimes wall time, etc.
-    fn get_time(&self) -> Result<Duration, Error>;
+    fn get_time(&self) -> Result<Duration>;
+
+    /// Start a timer at the current time
+    fn start_timer<'s>(&'s self) -> Result<Timer<'s, Self>> {
+        Ok(Timer {
+            clock: &self,
+            start: self.get_time()?,
+        })
+    }
 }
 
 #[cfg(test)]
