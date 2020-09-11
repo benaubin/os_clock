@@ -1,6 +1,6 @@
 # os_clock
 
-Access various clocks (Per-Thread CPU Time, Monotomic) on Unix-family systems.
+Access various operating system clocks (such as per-thread CPU Time, system clock, monotomic, etc) on Unix-family systems.
 
 ```rs
 use std::io;
@@ -14,3 +14,8 @@ let time = clock.get_time();
 ```
 
 Notably, a clock for the CPU time of one thread can be accessed from another thread.
+
+
+## Compatibility
+
+Works on recent iOS, Mac, as well as Unix-family systems with a `pthread.h` that defines `pthread_getcpuclockid` (most modern Linux).
