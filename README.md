@@ -2,7 +2,7 @@
 
 Access various operating system clocks (such as per-thread CPU Time, system clock, monotomic, etc) on Unix-family systems.
 
-```rs
+```rust
 use os_clock::{self, Clock};
 
 let clock = cpu_clock_for_current_thread();
@@ -11,7 +11,7 @@ clock.get_time();
 
 Notably, a clock for the CPU time of one thread can be accessed from another thread:
 
-```rs
+```rust
 let clock = cpu_clock_for_current_thread().unwrap();
 
 loop {
