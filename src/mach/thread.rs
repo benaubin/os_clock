@@ -54,7 +54,7 @@ impl Thread {
         Ok(time)
     }
 
-    // system_time + user_time at a single instant
+    /// system_time + user_time at a single instant
     pub fn get_cpu_time(&self) -> Result<Duration> {
         let info = self.get_basic_info()?;
         let time = Duration::from(info.user_time) + Duration::from(info.system_time);
