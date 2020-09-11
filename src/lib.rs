@@ -27,6 +27,27 @@ pub trait Clock: Sized + Send {
 #[cfg(test)]
 mod tests {
     use super::{cpu_clock_for_current_thread, Clock};
+    use std::time::Duration;
+
+    #[test]
+    fn thread_clock_transferable() {
+        let clock = cpu_clock_for_current_thread().unwrap();
+
+        loop {
+            if clock.get_time().unwrap() > Duration::from_millis(5) {
+                break;
+            }
+        }
+
+        std::thread::spawn(move || {
+            assert!(clock.get_time().unwrap() > Duration::from_millis(5));
+
+            let self_clock = cpu_clock_for_current_thread().unwrap();
+            assert!(self_clock.get_time().unwrap() < Duration::from_millis(1));
+        })
+        .join()
+        .unwrap();
+    }
 
     #[test]
     fn valid_measurement() {
