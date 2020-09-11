@@ -84,18 +84,6 @@ impl From<Thread> for ThreadCPUClock {
 }
 
 /// Get a clock for the CPU time of the current thread
-///
-/// ```
-/// use std::io;
-/// use os_clock::{self, Clock};
-///
-/// let clock = os_clock::cpu_clock_for_current_thread().unwrap();
-/// let time = clock.get_time().unwrap();
-///
-/// # let time_2 = clock.get_time().unwrap();
-/// #
-/// # assert!(time_2 > time);
-/// ```
 pub fn cpu_clock_for_current_thread() -> Result<ThreadCPUClock> {
     Ok(Thread::current().into())
 }

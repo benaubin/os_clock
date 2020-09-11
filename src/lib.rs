@@ -1,3 +1,39 @@
+//! Access various operating system clocks (such as per-thread CPU Time, system clock, monotomic, etc) on Unix-family systems.
+//!
+//! ## Thread clocks:
+//!
+//! Sendable per-thread CPU clocks are unique to this crate:
+//!
+//! ```
+//! # use std::time::Duration;
+//! # use os_clock::{self, Clock};
+//! #
+//! let clock = os_clock::cpu_clock_for_current_thread().unwrap();
+//!
+//! let start_time = clock.get_time().unwrap();
+//! // Do some work for 5ms...
+//! # loop {
+//! #     if clock.get_time().unwrap() > (start_time + Duration::from_millis(5)) {
+//! #         break;
+//! #     }
+//! # }
+//! assert!(clock.get_time().unwrap() > start_time + Duration::from_millis(5));
+//!
+//! // Notably, a clock for the CPU time of one thread can be accessed from another thread:
+//! std::thread::spawn(move || {
+//!     assert!(clock.get_time().unwrap() > Duration::from_millis(5));
+//!
+//!     let self_clock = os_clock::cpu_clock_for_current_thread().unwrap();
+//!     assert!(self_clock.get_time().unwrap() < Duration::from_millis(1));
+//! })
+//! .join()
+//! # .unwrap();
+//!
+//! // Clocks count from the thread's spawn time
+//! let new_clock = os_clock::cpu_clock_for_current_thread().unwrap();
+//! assert!(new_clock.get_time().unwrap() > Duration::from_millis(5));
+//! ```
+
 use std::io::Error;
 use std::time::Duration;
 
@@ -27,27 +63,6 @@ pub trait Clock: Sized + Send {
 #[cfg(test)]
 mod tests {
     use super::{cpu_clock_for_current_thread, Clock};
-    use std::time::Duration;
-
-    #[test]
-    fn thread_clock_transferable() {
-        let clock = cpu_clock_for_current_thread().unwrap();
-
-        loop {
-            if clock.get_time().unwrap() > Duration::from_millis(5) {
-                break;
-            }
-        }
-
-        std::thread::spawn(move || {
-            assert!(clock.get_time().unwrap() > Duration::from_millis(5));
-
-            let self_clock = cpu_clock_for_current_thread().unwrap();
-            assert!(self_clock.get_time().unwrap() < Duration::from_millis(1));
-        })
-        .join()
-        .unwrap();
-    }
 
     #[test]
     fn valid_measurement() {
